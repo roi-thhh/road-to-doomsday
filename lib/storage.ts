@@ -1,23 +1,9 @@
-import { UserProgress, RoleSelection, WatchStatus, UserProfile } from './types';
+import { WatchStatus, UserProfile } from './types';
 
 const STORAGE_KEYS = {
   USER_PROFILE: 'mcu_doomsday_user_profile',
   USER_PROGRESS: 'mcu_doomsday_user_progress',
-  PARTNER_SIMULATION: 'mcu_doomsday_partner_sim',
-  PARTNER_LINKED_ID: 'mcu_doomsday_partner_linked_id',
-};
-
-// Initial default partner progress simulation for demo/couples experience
-const MOCK_PARTNER_INITIAL_PROGRESS: Record<string, WatchStatus> = {
-  'm1': 'watched',
-  'm6': 'watched',
-  'm19': 'watched',
-  'm24': 'watched',
-  's10': 'watched',
-  'm27': 'watched',
-  'm30': 'watching',
-  'm36': 'watched',
-  'm37': 'watching',
+  PARTNER_PROGRESS: 'mcu_doomsday_partner_progress',
 };
 
 export const getStoredUserProfile = (): UserProfile | null => {
@@ -31,10 +17,14 @@ export const getStoredUserProfile = (): UserProfile | null => {
   }
 };
 
-export const setStoredUserProfile = (profile: UserProfile): void => {
+export const setStoredUserProfile = (profile: UserProfile | null): void => {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+    if (profile) {
+      localStorage.setItem(STORAGE_KEYS.USER_PROFILE, JSON.stringify(profile));
+    } else {
+      localStorage.removeItem(STORAGE_KEYS.USER_PROFILE);
+    }
   } catch (e) {
     console.error('Error saving user profile', e);
   }
@@ -44,17 +34,7 @@ export const getStoredUserProgress = (): Record<string, WatchStatus> => {
   if (typeof window === 'undefined') return {};
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.USER_PROGRESS);
-    if (!raw) {
-      // Default initial watched items for a fun starting experience
-      const initial: Record<string, WatchStatus> = {
-        'm1': 'watched',
-        'm24': 'watched',
-        's10': 'watching',
-      };
-      localStorage.setItem(STORAGE_KEYS.USER_PROGRESS, JSON.stringify(initial));
-      return initial;
-    }
-    return JSON.parse(raw);
+    return raw ? JSON.parse(raw) : {};
   } catch (e) {
     console.error('Error loading user progress', e);
     return {};
@@ -71,19 +51,19 @@ export const setStoredUserProgress = (progress: Record<string, WatchStatus>): vo
 };
 
 export const getStoredPartnerProgress = (): Record<string, WatchStatus> => {
-  if (typeof window === 'undefined') return MOCK_PARTNER_INITIAL_PROGRESS;
+  if (typeof window === 'undefined') return {};
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.PARTNER_SIMULATION);
-    return raw ? JSON.parse(raw) : MOCK_PARTNER_INITIAL_PROGRESS;
+    const raw = localStorage.getItem(STORAGE_KEYS.PARTNER_PROGRESS);
+    return raw ? JSON.parse(raw) : {};
   } catch (e) {
-    return MOCK_PARTNER_INITIAL_PROGRESS;
+    return {};
   }
 };
 
 export const setStoredPartnerProgress = (partnerProgress: Record<string, WatchStatus>): void => {
   if (typeof window === 'undefined') return;
   try {
-    localStorage.setItem(STORAGE_KEYS.PARTNER_SIMULATION, JSON.stringify(partnerProgress));
+    localStorage.setItem(STORAGE_KEYS.PARTNER_PROGRESS, JSON.stringify(partnerProgress));
   } catch (e) {
     console.error('Error saving partner progress', e);
   }

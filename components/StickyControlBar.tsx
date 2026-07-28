@@ -32,9 +32,9 @@ interface StickyControlBarProps {
   partnerProgress: Record<string, WatchStatus>;
   totalCount: number;
   userProfile: UserProfile | null;
-  onOpenAuth: () => void;
+  onOpenAuth: (mode?: 'signin' | 'signup' | 'partner') => void;
   onLogout: () => void;
-  onSimulatePartnerClick: () => void;
+  onRefreshPartnerProgress: () => void;
 }
 
 export default function StickyControlBar({
@@ -52,7 +52,7 @@ export default function StickyControlBar({
   userProfile,
   onOpenAuth,
   onLogout,
-  onSimulatePartnerClick,
+  onRefreshPartnerProgress,
 }: StickyControlBarProps) {
   const [copied, setCopied] = useState(false);
 
@@ -90,21 +90,29 @@ export default function StickyControlBar({
             </div>
           </div>
 
-          {/* User Profile / Auth Status Pill */}
+          {/* User Profile / Auth & Partner Link Pill */}
           <div className="flex items-center gap-2">
             {userProfile ? (
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyId}
-                  className="bg-white text-black px-2.5 py-1 border-2 border-black rounded-md font-black text-xs uppercase flex items-center gap-1 shadow-brutal-sm hover:bg-black hover:text-white transition-colors"
+                  className="bg-white text-black px-2.5 py-1 border-2 border-black rounded-md font-black text-xs uppercase flex items-center gap-1 shadow-brutal-sm hover:bg-black hover:text-white transition-colors cursor-pointer"
                   title="Click to copy your User Sync ID for your partner"
                 >
                   {copied ? <Check className="w-3.5 h-3.5 text-neo-green" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{userProfile.id.slice(0, 10)}</span>
+                  <span>{userProfile.id.slice(0, 8)}</span>
+                </button>
+                <button
+                  onClick={() => onOpenAuth('partner')}
+                  className="bg-neo-pink text-black px-2.5 py-1 border-2 border-black rounded-md font-black text-xs uppercase flex items-center gap-1 shadow-brutal-sm hover:bg-black hover:text-white transition-colors cursor-pointer"
+                  title="Link or update your partner ID"
+                >
+                  <Heart className="w-3.5 h-3.5 fill-current" />
+                  <span>PARTNER</span>
                 </button>
                 <button
                   onClick={onLogout}
-                  className="bg-neo-red text-white p-1.5 border-2 border-black rounded-md hover:bg-black transition-colors"
+                  className="bg-neo-red text-white p-1.5 border-2 border-black rounded-md hover:bg-black transition-colors cursor-pointer"
                   title="Log Out"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -112,11 +120,11 @@ export default function StickyControlBar({
               </div>
             ) : (
               <button
-                onClick={onOpenAuth}
+                onClick={() => onOpenAuth('signin')}
                 className="bg-black text-neo-yellow px-3 py-1.5 border-2 border-black rounded-lg font-black text-xs uppercase flex items-center gap-1.5 shadow-brutal-sm hover:bg-neo-red hover:text-white transition-all cursor-pointer"
               >
                 <UserCheck className="w-3.5 h-3.5" />
-                <span>LINK PARTNER</span>
+                <span>LOG IN / LINK PARTNER</span>
               </button>
             )}
           </div>
@@ -129,7 +137,7 @@ export default function StickyControlBar({
           <div className="bg-black text-white p-1 rounded-xl border-4 border-black flex items-center shadow-brutal-sm">
             <button
               onClick={() => setOrder('chronological')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all cursor-pointer ${
                 order === 'chronological'
                   ? 'bg-neo-yellow text-black shadow-brutal-sm scale-105'
                   : 'hover:text-neo-yellow'
@@ -139,7 +147,7 @@ export default function StickyControlBar({
             </button>
             <button
               onClick={() => setOrder('release')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all ${
+              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all cursor-pointer ${
                 order === 'release'
                   ? 'bg-neo-yellow text-black shadow-brutal-sm scale-105'
                   : 'hover:text-neo-yellow'
@@ -153,7 +161,7 @@ export default function StickyControlBar({
           <div className="bg-black text-white p-1 rounded-xl border-4 border-black flex items-center shadow-brutal-sm">
             <button
               onClick={() => setScope('essential')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all flex items-center gap-1 cursor-pointer ${
                 scope === 'essential'
                   ? 'bg-neo-red text-white shadow-brutal-sm scale-105'
                   : 'hover:text-neo-red'
@@ -163,7 +171,7 @@ export default function StickyControlBar({
             </button>
             <button
               onClick={() => setScope('completionist')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all flex items-center gap-1 ${
+              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all flex items-center gap-1 cursor-pointer ${
                 scope === 'completionist'
                   ? 'bg-neo-blue text-white shadow-brutal-sm scale-105'
                   : 'hover:text-neo-blue'
@@ -206,9 +214,9 @@ export default function StickyControlBar({
               <span className="font-black text-sm text-neo-blue">{watchedPartner} / {totalCount} ({partnerPercent}%)</span>
             </div>
             <button
-              onClick={onSimulatePartnerClick}
-              className="w-8 h-8 rounded-full border-2 border-black bg-neo-pink text-white flex items-center justify-center font-black text-xs hover:rotate-45 transition-transform"
-              title="Click to randomize partner progress for testing overlay badges"
+              onClick={() => onOpenAuth('partner')}
+              className="w-8 h-8 rounded-full border-2 border-black bg-neo-pink text-white flex items-center justify-center font-black text-xs hover:scale-110 transition-transform cursor-pointer"
+              title="Click to link partner or sync partner timeline"
             >
               <Heart className="w-4 h-4 fill-current" />
             </button>

@@ -41,8 +41,9 @@ export default function Home() {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userRole, setUserRole] = useState<RoleType | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup' | 'partner'>('signin');
 
-  // Watch Progress State
+  // Watch Progress State (starts completely empty by default for new accounts)
   const [userProgress, setUserProgress] = useState<Record<string, WatchStatus>>({});
   const [partnerProgress, setPartnerProgress] = useState<Record<string, WatchStatus>>({});
 
@@ -64,23 +65,22 @@ export default function Home() {
         setUserRole(profile.roleSelection);
 
         // Fetch user progress from Supabase
-        const dbProgress = await fetchDbUserProgress(profile.id);
-        if (Object.keys(dbProgress).length > 0) {
+        if (profile.id) {
+          const dbProgress = await fetchDbUserProgress(profile.id);
           setUserProgress(dbProgress);
           setStoredUserProgress(dbProgress);
         } else {
           setUserProgress(getStoredUserProgress());
         }
 
-        // Fetch partner progress from Supabase if linked
-        if (profile.partnerId) {
-          const dbPartnerProgress = await fetchDbPartnerProgress(profile.partnerId);
-          if (Object.keys(dbPartnerProgress).length > 0) {
-            setPartnerProgress(dbPartnerProgress);
-            setStoredPartnerProgress(dbPartnerProgress);
-          } else {
-            setPartnerProgress(getStoredPartnerProgress());
-          }
+        // Fetch partner progress from Supabase if partner linked
+        if (profile.partnerId || profile.partnerEmail) {
+          const target = profile.partnerId || profile.partnerEmail || '';
+          const dbPartnerProgress = await fetchDbPartnerProgress(target);
+          setPartnerProgress(dbPartnerProgress);
+          setStoredPartnerProgress(dbPartnerProgress);
+        } else {
+          setPartnerProgress(getStoredPartnerProgress());
         }
       } else {
         setUserProgress(getStoredUserProgress());
@@ -103,6 +103,7 @@ export default function Home() {
   const handleSelectRole = (role: RoleType) => {
     setUserRole(role);
     setAppPhase('dashboard');
+    setAuthModalMode('signup');
     setIsAuthModalOpen(true);
   };
 
@@ -113,20 +114,39 @@ export default function Home() {
     setStoredUserProfile(profile);
     setIsAuthModalOpen(false);
 
-    // Fetch user and partner progress from backend
-    const dbProgress = await fetchDbUserProgress(profile.id);
-    if (Object.keys(dbProgress).length > 0) {
+    // Fetch user progress from backend
+    if (profile.id) {
+      const dbProgress = await fetchDbUserProgress(profile.id);
       setUserProgress(dbProgress);
       setStoredUserProgress(dbProgress);
     }
 
-    if (profile.partnerId) {
-      const dbPartnerProgress = await fetchDbPartnerProgress(profile.partnerId);
-      if (Object.keys(dbPartnerProgress).length > 0) {
-        setPartnerProgress(dbPartnerProgress);
-        setStoredPartnerProgress(dbPartnerProgress);
-      }
+    // Fetch partner progress from backend if linked
+    if (profile.partnerId || profile.partnerEmail) {
+      const target = profile.partnerId || profile.partnerEmail || '';
+      const dbPartnerProgress = await fetchDbPartnerProgress(target);
+      setPartnerProgress(dbPartnerProgress);
+      setStoredPartnerProgress(dbPartnerProgress);
     }
+  };
+
+  // Handle Partner Linking
+  const handlePartnerLinked = async (partnerIdOrEmail: string) => {
+    if (!partnerIdOrEmail.trim()) return;
+
+    if (userProfile) {
+      const updatedProfile: UserProfile = {
+        ...userProfile,
+        partnerId: partnerIdOrEmail.trim(),
+      };
+      setUserProfile(updatedProfile);
+      setStoredUserProfile(updatedProfile);
+    }
+
+    // Fetch real partner progress from Supabase database
+    const dbPartnerProgress = await fetchDbPartnerProgress(partnerIdOrEmail.trim());
+    setPartnerProgress(dbPartnerProgress);
+    setStoredPartnerProgress(dbPartnerProgress);
   };
 
   // Handle Watch Status Toggle for a movie (Saves to both Supabase and Local Storage)
@@ -142,31 +162,14 @@ export default function Home() {
     }
   };
 
-  // Handle Partner Progress Refresh / Simulation
-  const handleSimulatePartnerProgress = async () => {
-    if (userProfile?.partnerId && isSupabaseConfigured()) {
-      const dbPartnerProgress = await fetchDbPartnerProgress(userProfile.partnerId);
-      if (Object.keys(dbPartnerProgress).length > 0) {
-        setPartnerProgress(dbPartnerProgress);
-        setStoredPartnerProgress(dbPartnerProgress);
-        return;
-      }
+  // Handle Refreshing Partner Progress from Database
+  const handleRefreshPartnerProgress = async () => {
+    if ((userProfile?.partnerId || userProfile?.partnerEmail) && isSupabaseConfigured()) {
+      const target = userProfile.partnerId || userProfile.partnerEmail || '';
+      const dbPartnerProgress = await fetchDbPartnerProgress(target);
+      setPartnerProgress(dbPartnerProgress);
+      setStoredPartnerProgress(dbPartnerProgress);
     }
-
-    // Secondary fallback simulation
-    const allIds = [
-      ...SERIES_ROAD_ROWS.flat().map((i) => i.id),
-      ...MOVIE_ROAD_ROWS.flat().map((i) => i.id),
-    ];
-    const newPartner: Record<string, WatchStatus> = {};
-    allIds.forEach((id) => {
-      const rand = Math.random();
-      if (rand > 0.6) newPartner[id] = 'watched';
-      else if (rand > 0.4) newPartner[id] = 'watching';
-      else newPartner[id] = 'unwatched';
-    });
-    setPartnerProgress(newPartner);
-    setStoredPartnerProgress(newPartner);
   };
 
   // Compute total items count depending on scope
@@ -210,13 +213,19 @@ export default function Home() {
               partnerProgress={partnerProgress}
               totalCount={totalCount}
               userProfile={userProfile}
-              onOpenAuth={() => setIsAuthModalOpen(true)}
+              onOpenAuth={(mode = 'signin') => {
+                setAuthModalMode(mode);
+                setIsAuthModalOpen(true);
+              }}
               onLogout={() => {
                 setUserProfile(null);
+                setUserRole(null);
+                setUserProgress({});
+                setPartnerProgress({});
                 localStorage.clear();
                 setAppPhase('onboarding');
               }}
-              onSimulatePartnerClick={handleSimulatePartnerProgress}
+              onRefreshPartnerProgress={handleRefreshPartnerProgress}
             />
 
             {/* Serpentine Timeline Tree */}
@@ -256,7 +265,10 @@ export default function Home() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         role={userRole}
+        currentUserProfile={userProfile}
+        initialMode={authModalMode}
         onAuthenticate={handleAuthenticate}
+        onPartnerLinked={handlePartnerLinked}
       />
 
       {/* Movie Details Modal */}

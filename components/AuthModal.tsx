@@ -1,20 +1,47 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { UserProfile, RoleSelection } from '@/lib/types';
-import { supabase, isSupabaseConfigured, saveDbUserProfile } from '@/lib/supabase';
-import { X, Lock, Mail, UserCheck, Heart, Sparkles, CheckCircle2, ShieldAlert, Key } from 'lucide-react';
+import { 
+  supabase, 
+  isSupabaseConfigured, 
+  saveDbUserProfile, 
+  updateDbPartnerLink 
+} from '@/lib/supabase';
+import { 
+  X, 
+  Lock, 
+  Mail, 
+  UserCheck, 
+  Heart, 
+  Sparkles, 
+  CheckCircle2, 
+  ShieldAlert, 
+  Key, 
+  Link as LinkIcon 
+} from 'lucide-react';
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   role: RoleSelection | null;
+  currentUserProfile: UserProfile | null;
   onAuthenticate: (profile: UserProfile) => void;
+  onPartnerLinked: (partnerIdOrEmail: string) => void;
+  initialMode?: 'signin' | 'signup' | 'partner';
 }
 
-export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: AuthModalProps) {
-  const [isSignUp, setIsSignUp] = useState(false);
+export default function AuthModal({
+  isOpen,
+  onClose,
+  role,
+  currentUserProfile,
+  onAuthenticate,
+  onPartnerLinked,
+  initialMode = 'signin',
+}: AuthModalProps) {
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup' | 'partner'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [partnerIdOrEmail, setPartnerIdOrEmail] = useState('');
@@ -22,11 +49,22 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
+  useEffect(() => {
+    if (initialMode) setActiveTab(initialMode);
+  }, [initialMode]);
+
+  useEffect(() => {
+    if (currentUserProfile?.partnerId || currentUserProfile?.partnerEmail) {
+      setPartnerIdOrEmail(currentUserProfile.partnerId || currentUserProfile.partnerEmail || '');
+    }
+  }, [currentUserProfile]);
+
   if (!isOpen) return null;
 
   const isConfigured = isSupabaseConfigured();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Submit Sign In or Sign Up Form
+  const handleSubmitAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     setSuccessMsg('');
@@ -39,7 +77,7 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
     }
 
     try {
-      if (isSignUp) {
+      if (activeTab === 'signup') {
         // Real Supabase User Registration
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -53,17 +91,21 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
             id: data.user.id,
             email: data.user.email || email,
             roleSelection: role,
-            partnerId: partnerIdOrEmail ? partnerIdOrEmail : undefined,
+            partnerId: partnerIdOrEmail.trim() || undefined,
           };
 
           // Save profile record into Supabase users table
           await saveDbUserProfile(userProf);
 
+          if (partnerIdOrEmail.trim()) {
+            onPartnerLinked(partnerIdOrEmail.trim());
+          }
+
           onAuthenticate(userProf);
-          setSuccessMsg('Account registered & partner linked successfully!');
+          setSuccessMsg('Account registered & synced successfully!');
           setTimeout(() => onClose(), 1000);
         }
-      } else {
+      } else if (activeTab === 'signin') {
         // Real Supabase User Sign In
         const { data, error } = await supabase.auth.signInWithPassword({
           email,
@@ -77,19 +119,58 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
             id: data.user.id,
             email: data.user.email || email,
             roleSelection: role,
-            partnerId: partnerIdOrEmail ? partnerIdOrEmail : undefined,
+            partnerId: partnerIdOrEmail.trim() || undefined,
           };
 
-          // Update user profile in Supabase table
           await saveDbUserProfile(userProf);
 
+          if (partnerIdOrEmail.trim()) {
+            onPartnerLinked(partnerIdOrEmail.trim());
+          }
+
           onAuthenticate(userProf);
-          setSuccessMsg('Signed in successfully to Supabase Backend!');
+          setSuccessMsg('Signed in successfully!');
           setTimeout(() => onClose(), 1000);
         }
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Authentication failed. Please check credentials.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Submit Partner Link Form (when logged in or linking partner)
+  const handleSubmitPartnerLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+
+    if (!partnerIdOrEmail.trim()) {
+      setErrorMsg('Please enter a valid Partner User ID or Email address.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      if (currentUserProfile?.id && isConfigured) {
+        const res = await updateDbPartnerLink(currentUserProfile.id, partnerIdOrEmail.trim());
+        if (res.success) {
+          const updated: UserProfile = {
+            ...currentUserProfile,
+            partnerId: res.partnerId || partnerIdOrEmail.trim(),
+            partnerEmail: res.partnerEmail,
+          };
+          onAuthenticate(updated);
+        }
+      }
+
+      onPartnerLinked(partnerIdOrEmail.trim());
+      setSuccessMsg('Partner linked & progress overlay updated!');
+      setTimeout(() => onClose(), 1200);
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Could not link partner. Please check User ID or Email.');
     } finally {
       setLoading(false);
     }
@@ -107,22 +188,43 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 bg-black text-white p-2 border-2 border-black rounded-lg hover:bg-neo-red transition-colors"
+            className="absolute top-4 right-4 bg-black text-white p-2 border-2 border-black rounded-lg hover:bg-neo-red transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {/* Header */}
-          <div className="mb-6 text-center">
-            <span className="inline-flex items-center gap-1.5 bg-neo-red text-white px-3 py-1 border-2 border-black rounded-full text-xs font-black uppercase mb-2 shadow-brutal-sm">
-              <Heart className="w-3.5 h-3.5 fill-current" /> SUPABASE REAL AUTH
-            </span>
-            <h2 className="text-3xl font-black uppercase tracking-tight font-display">
-              {isSignUp ? 'CREATE ACCOUNT' : 'SUPABASE LOGIN'}
-            </h2>
-            <p className="text-xs font-bold text-black/80 mt-1">
-              Selected Role: <span className="bg-black text-neo-yellow px-2 py-0.5 rounded font-black uppercase">{role || 'AVENGER'}</span>
-            </p>
+          {/* Mode Tabs */}
+          <div className="flex bg-black text-white rounded-xl border-4 border-black p-1 mb-6 shadow-brutal-sm">
+            <button
+              onClick={() => setActiveTab('signin')}
+              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all ${
+                activeTab === 'signin'
+                  ? 'bg-neo-yellow text-black shadow-brutal-sm'
+                  : 'hover:text-neo-yellow'
+              }`}
+            >
+              SIGN IN
+            </button>
+            <button
+              onClick={() => setActiveTab('signup')}
+              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all ${
+                activeTab === 'signup'
+                  ? 'bg-neo-yellow text-black shadow-brutal-sm'
+                  : 'hover:text-neo-yellow'
+              }`}
+            >
+              REGISTER
+            </button>
+            <button
+              onClick={() => setActiveTab('partner')}
+              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all flex items-center justify-center gap-1 ${
+                activeTab === 'partner'
+                  ? 'bg-neo-pink text-black shadow-brutal-sm'
+                  : 'hover:text-neo-pink'
+              }`}
+            >
+              <Heart className="w-3.5 h-3.5 fill-current" /> PARTNER
+            </button>
           </div>
 
           {!isConfigured && (
@@ -131,7 +233,7 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
                 <Key className="w-4 h-4 shrink-0" /> SUPABASE CREDENTIALS REQUIRED
               </div>
               <p className="text-[11px] leading-relaxed">
-                Add your <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to your <code className="bg-black text-white px-1 py-0.5 rounded">.env.local</code> file to enable live backend login!
+                Add your <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to your <code className="bg-black text-white px-1 py-0.5 rounded">.env.local</code> file to enable live backend database sync!
               </p>
             </div>
           )}
@@ -148,40 +250,39 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
             </div>
           )}
 
-          {/* Real Auth Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-xs font-black uppercase mb-1">Email Address</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-3 w-4 h-4 text-black/60" />
-                <input
-                  type="email"
-                  required
-                  placeholder="avenger@marvel.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
-                />
+          {/* TAB 1 & 2: SIGN IN & REGISTER */}
+          {(activeTab === 'signin' || activeTab === 'signup') && (
+            <form onSubmit={handleSubmitAuth} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-black uppercase mb-1">Email Address</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-3 w-4 h-4 text-black/60" />
+                  <input
+                    type="email"
+                    required
+                    placeholder="avenger@marvel.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div>
-              <label className="block text-xs font-black uppercase mb-1">Password</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-3 w-4 h-4 text-black/60" />
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
-                />
+              <div>
+                <label className="block text-xs font-black uppercase mb-1">Password</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-3 w-4 h-4 text-black/60" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* Partner Linking Field */}
-            {isSignUp && (
               <div>
                 <label className="block text-xs font-black uppercase mb-1">
                   Partner User ID or Email <span className="text-neo-red">(Optional)</span>
@@ -200,29 +301,58 @@ export default function AuthModal({ isOpen, onClose, role, onAuthenticate }: Aut
                   Links accounts in Supabase database so your partner&apos;s watch progress overlays automatically.
                 </p>
               </div>
-            )}
 
-            {/* Submit Button */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              disabled={loading}
-              type="submit"
-              className="mt-2 bg-neo-red text-white py-3 border-4 border-black rounded-lg font-black uppercase text-base shadow-brutal hover:bg-black hover:text-neo-yellow transition-all flex items-center justify-center gap-2 cursor-pointer"
-            >
-              {loading ? 'Authenticating with Backend...' : isSignUp ? 'SIGN UP & SYNC DATABASE ⚡' : 'LOG IN TO SUPABASE 🛡️'}
-            </motion.button>
-          </form>
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={loading}
+                type="submit"
+                className="mt-2 bg-neo-red text-white py-3 border-4 border-black rounded-lg font-black uppercase text-base shadow-brutal hover:bg-black hover:text-neo-yellow transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loading ? 'Authenticating...' : activeTab === 'signup' ? 'CREATE ACCOUNT & SYNC ⚡' : 'LOG IN TO SUPABASE 🛡️'}
+              </motion.button>
+            </form>
+          )}
 
-          {/* Toggle Sign In / Register */}
-          <div className="mt-4 pt-4 border-t-2 border-black flex flex-col items-center gap-3 text-center">
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-xs font-black uppercase text-black hover:underline"
-            >
-              {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Register Now"}
-            </button>
-          </div>
+          {/* TAB 3: LINK PARTNER */}
+          {activeTab === 'partner' && (
+            <form onSubmit={handleSubmitPartnerLink} className="flex flex-col gap-4">
+              <div className="bg-white border-4 border-black p-4 rounded-xl shadow-brutal-sm">
+                <h3 className="text-sm font-black uppercase mb-1 flex items-center gap-1.5">
+                  <LinkIcon className="w-4 h-4 text-neo-red" /> PARTNER SYNCHRONIZATION
+                </h3>
+                <p className="text-xs text-black/80 leading-relaxed font-medium">
+                  Enter your partner&apos;s **User Sync ID** or **Email Address** below to link your timeline progress!
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black uppercase mb-1">Partner User ID or Email</label>
+                <div className="relative">
+                  <Heart className="absolute left-3 top-3 w-4 h-4 text-neo-red fill-current" />
+                  <input
+                    type="text"
+                    required
+                    placeholder="partner@marvel.com or USR-8921"
+                    value={partnerIdOrEmail}
+                    onChange={(e) => setPartnerIdOrEmail(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
+                  />
+                </div>
+              </div>
+
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                disabled={loading}
+                type="submit"
+                className="mt-2 bg-neo-pink text-black py-3 border-4 border-black rounded-lg font-black uppercase text-base shadow-brutal hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer"
+              >
+                {loading ? 'Linking Partner...' : 'LINK & OVERLAY TIMELINE ⚡'}
+              </motion.button>
+            </form>
+          )}
+
         </motion.div>
       </div>
     </AnimatePresence>

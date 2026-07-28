@@ -63,8 +63,62 @@ export async function saveDbUserProfile(profile: UserProfile): Promise<boolean> 
   }
 }
 
+export async function updateDbPartnerLink(userId: string, partnerIdOrEmail: string): Promise<{ success: boolean; partnerId?: string; partnerEmail?: string }> {
+  if (!isSupabaseConfigured() || !userId || !partnerIdOrEmail) {
+    return { success: false };
+  }
+
+  try {
+    let resolvedPartnerId = partnerIdOrEmail.trim();
+    let resolvedPartnerEmail: string | undefined = undefined;
+
+    // Look up partner user ID if an email was entered
+    if (partnerIdOrEmail.includes('@')) {
+      resolvedPartnerEmail = partnerIdOrEmail.trim().toLowerCase();
+      const { data: partnerUser } = await supabase
+        .from('users')
+        .select('id, email')
+        .eq('email', resolvedPartnerEmail)
+        .maybeSingle();
+
+      if (partnerUser) {
+        resolvedPartnerId = partnerUser.id;
+        resolvedPartnerEmail = partnerUser.email;
+      }
+    } else {
+      // Look up partner email if user ID was entered
+      const { data: partnerUser } = await supabase
+        .from('users')
+        .select('email')
+        .eq('id', resolvedPartnerId)
+        .maybeSingle();
+
+      if (partnerUser) {
+        resolvedPartnerEmail = partnerUser.email;
+      }
+    }
+
+    // Update users table in Supabase
+    const { error } = await supabase
+      .from('users')
+      .update({ partner_id: resolvedPartnerId, updated_at: new Date().toISOString() })
+      .eq('id', userId);
+
+    if (error) console.error('Error updating partner ID in DB', error);
+
+    return {
+      success: true,
+      partnerId: resolvedPartnerId,
+      partnerEmail: resolvedPartnerEmail,
+    };
+  } catch (e) {
+    console.error('Update partner link error', e);
+    return { success: false };
+  }
+}
+
 export async function fetchDbUserProgress(userId: string): Promise<Record<string, WatchStatus>> {
-  if (!isSupabaseConfigured()) return {};
+  if (!isSupabaseConfigured() || !userId) return {};
   try {
     const { data, error } = await supabase
       .from('user_progress')
@@ -89,7 +143,7 @@ export async function saveDbUserProgress(
   movieId: string,
   status: WatchStatus
 ): Promise<boolean> {
-  if (!isSupabaseConfigured()) return false;
+  if (!isSupabaseConfigured() || !userId) return false;
   try {
     const { error } = await supabase.from('user_progress').upsert({
       user_id: userId,
@@ -111,15 +165,16 @@ export async function saveDbUserProgress(
 export async function fetchDbPartnerProgress(partnerIdOrEmail: string): Promise<Record<string, WatchStatus>> {
   if (!isSupabaseConfigured() || !partnerIdOrEmail) return {};
   try {
-    let targetUserId = partnerIdOrEmail;
+    let targetUserId = partnerIdOrEmail.trim();
 
     // If partner is passed as email, look up user ID first
     if (partnerIdOrEmail.includes('@')) {
       const { data: userMatch } = await supabase
         .from('users')
         .select('id')
-        .eq('email', partnerIdOrEmail)
-        .single();
+        .eq('email', partnerIdOrEmail.trim().toLowerCase())
+        .maybeSingle();
+
       if (userMatch) targetUserId = userMatch.id;
     }
 
