@@ -19,7 +19,8 @@ import {
   CheckCircle2, 
   ShieldAlert, 
   Key, 
-  Link as LinkIcon 
+  Link as LinkIcon,
+  Info
 } from 'lucide-react';
 
 interface AuthModalProps {
@@ -71,7 +72,7 @@ export default function AuthModal({
     setLoading(true);
 
     if (!isConfigured) {
-      setErrorMsg('Supabase is not configured yet! Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file.');
+      setErrorMsg('Supabase is not configured yet! Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file or Vercel settings.');
       setLoading(false);
       return;
     }
@@ -102,8 +103,13 @@ export default function AuthModal({
           }
 
           onAuthenticate(userProf);
-          setSuccessMsg('Account registered & synced successfully!');
-          setTimeout(() => onClose(), 1000);
+
+          if (!data.session) {
+            setSuccessMsg('Account registered! Note: If "Confirm Email" is enabled in Supabase, check your inbox or turn off email confirmation in Supabase Dashboard (Auth -> Providers -> Email).');
+          } else {
+            setSuccessMsg('Account registered & logged in successfully!');
+          }
+          setTimeout(() => onClose(), 1500);
         }
       } else if (activeTab === 'signin') {
         // Real Supabase User Sign In
@@ -134,7 +140,14 @@ export default function AuthModal({
         }
       }
     } catch (err: any) {
-      setErrorMsg(err.message || 'Authentication failed. Please check credentials.');
+      const msg = err.message || '';
+      if (msg.toLowerCase().includes('email not confirmed')) {
+        setErrorMsg('Email not confirmed! Solution: In your Supabase Dashboard -> Auth -> Providers -> Email, turn OFF "Confirm email" to allow instant logins without confirmation links.');
+      } else if (msg.toLowerCase().includes('rate limit')) {
+        setErrorMsg('Email Rate Limit Exceeded! Solution: Turn OFF "Confirm email" in Supabase Dashboard -> Auth -> Providers -> Email. This disables email verification and bypasses rate limits.');
+      } else {
+        setErrorMsg(msg || 'Authentication failed. Please check credentials.');
+      }
     } finally {
       setLoading(false);
     }
@@ -183,7 +196,7 @@ export default function AuthModal({
           initial={{ opacity: 0, scale: 0.9, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.9, y: 20 }}
-          className="relative bg-neo-yellow text-black border-8 border-black rounded-2xl p-6 md:p-8 max-w-md w-full shadow-brutal-lg font-sans"
+          className="relative bg-neo-yellow text-black border-8 border-black rounded-2xl p-6 md:p-8 max-w-md w-full shadow-brutal-lg font-sans max-h-[90vh] overflow-y-auto"
         >
           {/* Close Button */}
           <button
@@ -197,7 +210,7 @@ export default function AuthModal({
           <div className="flex bg-black text-white rounded-xl border-4 border-black p-1 mb-6 shadow-brutal-sm">
             <button
               onClick={() => setActiveTab('signin')}
-              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all ${
+              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all cursor-pointer ${
                 activeTab === 'signin'
                   ? 'bg-neo-yellow text-black shadow-brutal-sm'
                   : 'hover:text-neo-yellow'
@@ -207,7 +220,7 @@ export default function AuthModal({
             </button>
             <button
               onClick={() => setActiveTab('signup')}
-              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all ${
+              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all cursor-pointer ${
                 activeTab === 'signup'
                   ? 'bg-neo-yellow text-black shadow-brutal-sm'
                   : 'hover:text-neo-yellow'
@@ -217,7 +230,7 @@ export default function AuthModal({
             </button>
             <button
               onClick={() => setActiveTab('partner')}
-              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all flex items-center justify-center gap-1 ${
+              className={`flex-1 py-2 font-black text-xs uppercase rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1 ${
                 activeTab === 'partner'
                   ? 'bg-neo-pink text-black shadow-brutal-sm'
                   : 'hover:text-neo-pink'
@@ -233,19 +246,22 @@ export default function AuthModal({
                 <Key className="w-4 h-4 shrink-0" /> SUPABASE CREDENTIALS REQUIRED
               </div>
               <p className="text-[11px] leading-relaxed">
-                Add your <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to your <code className="bg-black text-white px-1 py-0.5 rounded">.env.local</code> file to enable live backend database sync!
+                Add your <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_URL</code> and <code className="bg-black text-white px-1 py-0.5 rounded">NEXT_PUBLIC_SUPABASE_ANON_KEY</code> to your environment settings to enable live backend database sync!
               </p>
             </div>
           )}
 
           {errorMsg && (
-            <div className="mb-4 bg-neo-red text-white p-3 rounded-lg border-4 border-black text-xs font-bold flex items-center gap-2">
-              <ShieldAlert className="w-4 h-4 shrink-0" /> {errorMsg}
+            <div className="mb-4 bg-neo-red text-white p-3 rounded-lg border-4 border-black text-xs font-bold flex flex-col gap-1 shadow-brutal-sm">
+              <div className="flex items-center gap-2 font-black">
+                <ShieldAlert className="w-4 h-4 shrink-0" /> AUTH ERROR
+              </div>
+              <p className="text-[11px] leading-relaxed">{errorMsg}</p>
             </div>
           )}
 
           {successMsg && (
-            <div className="mb-4 bg-neo-green text-black p-3 rounded-lg border-4 border-black text-xs font-bold flex items-center gap-2">
+            <div className="mb-4 bg-neo-green text-black p-3 rounded-lg border-4 border-black text-xs font-bold flex items-center gap-2 shadow-brutal-sm">
               <CheckCircle2 className="w-4 h-4 shrink-0" /> {successMsg}
             </div>
           )}
