@@ -227,7 +227,7 @@ export default function StickyControlBar({
             href="https://www.instagram.com/roith.hhh?igsh=MWdmNHk2NXpmNjZ6Mg==" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:scale-110 transition-transform cursor-pointer border-4 border-black bg-white flex items-center justify-center w-12 h-12 rounded-xl shadow-brutal-sm"
+            className="hover:scale-110 transition-transform cursor-pointer border-4 border-black bg-white flex items-center justify-center w-14 h-14 md:w-20 md:h-16 rounded-xl shadow-brutal-sm ml-2"
             title="Follow Rohith Das on Instagram"
           >
             <img src="/logo-black.png" alt="Rohith Das Logo" className="w-full h-full object-contain p-1" />
