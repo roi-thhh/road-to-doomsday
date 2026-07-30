@@ -65,8 +65,8 @@ export default function Home() {
   const [partnerProgress, setPartnerProgress] = useState<Record<string, WatchStatus>>({});
 
   // Control Bar Toggles
-  const [order, setOrder] = useState<TimelineOrder>('chronological');
-  const [scope, setScope] = useState<ScopeMode>('essential');
+  const [order, setOrder] = useState<TimelineOrder>('release');
+  const [scope, setScope] = useState<ScopeMode>('completionist');
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPhase, setFilterPhase] = useState<number | null>(null);
 
