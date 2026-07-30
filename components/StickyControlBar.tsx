@@ -136,7 +136,7 @@ export default function StickyControlBar({
               className="ml-2 hover:scale-105 transition-transform cursor-pointer border-2 border-black bg-white flex items-center justify-center w-10 h-10 rounded-lg shadow-brutal-sm"
               title="Follow Rohith Das on Instagram"
             >
-              <img src="/logo.png" alt="Rohith Das Logo" className="w-full h-full object-contain p-1" />
+              <img src="/logo-black.png" alt="Rohith Das Logo" className="w-full h-full object-contain p-1" />
             </a>
           </div>
         </div>

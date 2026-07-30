@@ -398,28 +398,6 @@ export default function Home() {
         }}
       />
 
-      {/* Footer Section */}
-      <footer className="bg-black text-white py-16 border-t-8 border-neo-red relative flex flex-col items-center justify-center z-10 px-4 mt-20">
-        <div className="flex flex-col md:flex-row items-center gap-6 bg-neo-yellow px-8 py-6 border-4 border-white shadow-[8px_8px_0px_0px_rgba(239,68,68,1)] rounded-3xl">
-          <a 
-            href="https://www.instagram.com/roith.hhh?igsh=MWdmNHk2NXpmNjZ6Mg==" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="hover:scale-110 transition-transform cursor-pointer w-24 h-24 md:w-32 md:h-32 flex-shrink-0"
-            title="Follow Rohith Das on Instagram"
-          >
-            <img src="/logo-black.png" alt="Rohith Das Logo" className="w-full h-full object-contain drop-shadow-[2px_2px_0_rgba(255,255,255,1)]" />
-          </a>
-          <div className="flex flex-col gap-2 text-center md:text-left text-black border-t-4 md:border-t-0 md:border-l-4 border-black pt-4 md:pt-0 md:pl-6">
-            <p className="font-display font-black tracking-widest text-2xl md:text-3xl uppercase leading-none drop-shadow-[2px_2px_0_rgba(255,255,255,1)]">
-              CREATED BY ROHITH DAS
-            </p>
-            <p className="font-bold text-xs md:text-sm text-black/80 max-w-xs">
-              The Ultimate MCU Watch Tracker for the Road to Doomsday.
-            </p>
-          </div>
-        </div>
-      </footer>
     </main>
   );
 }
