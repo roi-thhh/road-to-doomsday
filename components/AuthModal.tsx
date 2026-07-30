@@ -320,47 +320,67 @@ export default function AuthModal({
 
           {/* TAB 1 & 2: SIGN IN & REGISTER */}
           {(activeTab === 'signin' || activeTab === 'signup') && (
-            <form onSubmit={handleSubmitAuth} className="flex flex-col gap-4">
-              <div>
-                <label className="block text-xs font-black uppercase mb-1">Email Address</label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 w-4 h-4 text-black/60" />
-                  <input
-                    type="email"
-                    required
-                    placeholder="avenger@marvel.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
-                  />
+            currentUserProfile ? (
+              <div className="flex flex-col gap-4">
+                <div className="bg-gray-100 border-4 border-black p-5 rounded-2xl shadow-brutal-sm flex flex-col gap-3 text-center">
+                  <h3 className="text-sm font-black uppercase text-black">You are already signed in</h3>
+                  <div>
+                    <label className="block text-xs font-black uppercase mb-1 text-left">Your Email Address</label>
+                    <input
+                      type="text"
+                      disabled
+                      value={currentUserProfile.email}
+                      className="w-full px-3 py-2 bg-gray-200 border-2 border-black rounded-lg font-black text-xs text-black/70 cursor-not-allowed select-all"
+                    />
+                  </div>
+                  <p className="text-[10px] font-bold text-black/60">
+                    If you want to sign in to a different account, please log out first using the control bar.
+                  </p>
                 </div>
               </div>
-
-              <div>
-                <label className="block text-xs font-black uppercase mb-1">Password</label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-3 w-4 h-4 text-black/60" />
-                  <input
-                    type="password"
-                    required
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
-                  />
+            ) : (
+              <form onSubmit={handleSubmitAuth} className="flex flex-col gap-4">
+                <div>
+                  <label className="block text-xs font-black uppercase mb-1">Email Address</label>
+                  <div className="relative">
+                    <Mail className="absolute left-3 top-3 w-4 h-4 text-black/60" />
+                    <input
+                      type="email"
+                      required
+                      placeholder="avenger@marvel.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
+                    />
+                  </div>
                 </div>
-              </div>
 
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={loading}
-                type="submit"
-                className="mt-2 bg-neo-red text-white py-3 border-4 border-black rounded-lg font-black uppercase text-base shadow-brutal hover:bg-black hover:text-neo-yellow transition-all flex items-center justify-center gap-2 cursor-pointer"
-              >
-                {loading ? 'Authenticating...' : activeTab === 'signup' ? 'CREATE ACCOUNT ⚡' : 'LOG IN TO SUPABASE 🛡️'}
-              </motion.button>
-            </form>
+                <div>
+                  <label className="block text-xs font-black uppercase mb-1">Password</label>
+                  <div className="relative">
+                    <Lock className="absolute left-3 top-3 w-4 h-4 text-black/60" />
+                    <input
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2.5 bg-white border-4 border-black rounded-lg font-bold text-sm focus:outline-none focus:ring-4 focus:ring-black shadow-brutal-sm"
+                    />
+                  </div>
+                </div>
+
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  disabled={loading}
+                  type="submit"
+                  className="mt-2 bg-neo-red text-white py-3 border-4 border-black rounded-lg font-black uppercase text-base shadow-brutal hover:bg-black hover:text-neo-yellow transition-all flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  {loading ? 'Authenticating...' : activeTab === 'signup' ? 'CREATE ACCOUNT ⚡' : 'SIGN IN 🛡️'}
+                </motion.button>
+              </form>
+            )
           )}
 
           {/* TAB 3: PARTNER LINK & REQUESTS */}
