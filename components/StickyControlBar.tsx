@@ -195,31 +195,34 @@ export default function StickyControlBar({
         </div>
 
         {/* Watch Progress Counter & Partner Sync Indicator */}
-        <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
-          {/* User Stat Pill */}
-          <div className="bg-white border-4 border-black p-2 rounded-xl flex items-center gap-3 shadow-brutal-sm">
-            <div className="text-left">
-              <span className="block text-[10px] font-black uppercase text-black/70 leading-tight">YOUR PROGRESS</span>
-              <span className="font-black text-sm text-neo-red">{watchedUser} / {totalCount} ({userPercent}%)</span>
+        <div className="flex flex-row flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
+          
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
+            {/* User Stat Pill */}
+            <div className="bg-white border-4 border-black p-2 rounded-xl flex items-center justify-between gap-3 shadow-brutal-sm flex-1">
+              <div className="text-left">
+                <span className="block text-[10px] font-black uppercase text-black/70 leading-tight">YOUR PROGRESS</span>
+                <span className="font-black text-sm text-neo-red">{watchedUser} / {totalCount} ({userPercent}%)</span>
+              </div>
+              <div className="w-8 h-8 rounded-full border-2 border-black bg-neo-yellow flex items-center justify-center font-black text-xs shrink-0">
+                ⚡
+              </div>
             </div>
-            <div className="w-8 h-8 rounded-full border-2 border-black bg-neo-yellow flex items-center justify-center font-black text-xs">
-              ⚡
-            </div>
-          </div>
 
-          {/* Partner Stat Pill */}
-          <div className="bg-white border-4 border-black p-2 rounded-xl flex items-center gap-3 shadow-brutal-sm">
-            <div className="text-left">
-              <span className="block text-[10px] font-black uppercase text-black/70 leading-tight">PARTNER WATCHED</span>
-              <span className="font-black text-sm text-neo-blue">{watchedPartner} / {totalCount} ({partnerPercent}%)</span>
+            {/* Partner Stat Pill */}
+            <div className="bg-white border-4 border-black p-2 rounded-xl flex items-center justify-between gap-3 shadow-brutal-sm flex-1">
+              <div className="text-left">
+                <span className="block text-[10px] font-black uppercase text-black/70 leading-tight">PARTNER WATCHED</span>
+                <span className="font-black text-sm text-neo-blue">{watchedPartner} / {totalCount} ({partnerPercent}%)</span>
+              </div>
+              <button
+                onClick={() => onOpenAuth('partner')}
+                className="w-8 h-8 rounded-full border-2 border-black bg-neo-pink text-white flex items-center justify-center font-black text-xs hover:scale-110 transition-transform cursor-pointer shrink-0"
+                title="Click to link partner or sync partner timeline"
+              >
+                <Heart className="w-4 h-4 fill-current" />
+              </button>
             </div>
-            <button
-              onClick={() => onOpenAuth('partner')}
-              className="w-8 h-8 rounded-full border-2 border-black bg-neo-pink text-white flex items-center justify-center font-black text-xs hover:scale-110 transition-transform cursor-pointer"
-              title="Click to link partner or sync partner timeline"
-            >
-              <Heart className="w-4 h-4 fill-current" />
-            </button>
           </div>
 
           {/* Instagram Logo Link */}

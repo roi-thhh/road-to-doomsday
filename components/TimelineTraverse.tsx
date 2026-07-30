@@ -74,18 +74,20 @@ export default function TimelineTraverse({
   const processedMovieRows = useMemo(() => processTimelineRows(MOVIE_ROAD_ROWS, 3), [scope, searchQuery, order]);
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-neo-blue text-black py-16 px-4 md:px-8 font-sans overflow-hidden">
+    <div ref={containerRef} className="relative min-h-screen bg-neo-blue text-black py-16 font-sans overflow-x-hidden">
       
-      {/* Central Progress Bar (Neo-Brutalist) */}
-      <div className="absolute left-1/2 top-0 bottom-0 w-5 bg-white border-x-4 border-black -translate-x-1/2 z-0 hidden md:block">
-        <motion.div
-          className="w-full bg-neo-red origin-top"
-          style={{ scaleY, height: '100%' }}
-        />
-      </div>
+      <div className="w-full overflow-x-auto pb-12">
+        <div className="min-w-[800px] relative px-4 md:px-8">
+          {/* Central Progress Bar (Neo-Brutalist) */}
+          <div className="absolute left-1/2 top-0 bottom-0 w-5 bg-white border-x-4 border-black -translate-x-1/2 z-0 block">
+            <motion.div
+              className="w-full bg-neo-red origin-top"
+              style={{ scaleY, height: '100%' }}
+            />
+          </div>
 
-      {/* Main Dual Columns Layout */}
-      <div className="relative z-10 flex flex-col lg:flex-row justify-between w-full max-w-7xl mx-auto gap-12 lg:gap-16">
+          {/* Main Dual Columns Layout */}
+          <div className="relative z-10 flex flex-row justify-between w-full max-w-7xl mx-auto gap-12 lg:gap-16">
         
         {/* Left Column: Street-Level & Series Road */}
         <div className="flex flex-col items-center w-full lg:w-1/2">
@@ -175,5 +177,7 @@ export default function TimelineTraverse({
 
       </div>
     </div>
+  </div>
+</div>
   );
 }
