@@ -43,6 +43,10 @@ export default function Home() {
   const [hasSessionLoaded, setHasSessionLoaded] = useState(false);
   const [hasVisualLoaderFinished, setHasVisualLoaderFinished] = useState(false);
 
+  // User Profile & Partner State
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [userRole, setUserRole] = useState<RoleType | null>(null);
+
   useEffect(() => {
     if (hasSessionLoaded && hasVisualLoaderFinished) {
       if (userRole || userProfile) {
@@ -52,10 +56,6 @@ export default function Home() {
       }
     }
   }, [hasSessionLoaded, hasVisualLoaderFinished, userRole, userProfile]);
-
-  // User Profile & Partner State
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [userRole, setUserRole] = useState<RoleType | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup' | 'partner'>('signin');
   const [pendingRequests, setPendingRequests] = useState<PartnerRequest[]>([]);
