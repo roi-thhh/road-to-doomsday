@@ -266,16 +266,28 @@ export async function saveDbUserProgress(
 ): Promise<boolean> {
   if (!isSupabaseConfigured() || !userId) return false;
   try {
-    const { error } = await supabase.from('user_progress').upsert({
-      user_id: userId,
-      movie_id: movieId,
-      status: status,
-      updated_at: new Date().toISOString(),
-    }, {
-      onConflict: 'user_id,movie_id'
-    });
+    // Check if progress row already exists
+    const { data: existing } = await supabase
+      .from('user_progress')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('movie_id', movieId)
+      .maybeSingle();
 
-    if (error) throw error;
+    if (existing) {
+      // Update existing
+      const { error } = await supabase
+        .from('user_progress')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', existing.id);
+      if (error) throw error;
+    } else {
+      // Insert new
+      const { error } = await supabase
+        .from('user_progress')
+        .insert({ user_id: userId, movie_id: movieId, status, updated_at: new Date().toISOString() });
+      if (error) throw error;
+    }
     return true;
   } catch (e) {
     console.error('Save DB progress error', e);

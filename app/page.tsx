@@ -40,7 +40,19 @@ import { SERIES_ROAD_ROWS, MOVIE_ROAD_ROWS } from '@/lib/mcuData';
 export default function Home() {
   // App Phase State: 'loader' -> 'onboarding' -> 'dashboard'
   const [appPhase, setAppPhase] = useState<'loader' | 'onboarding' | 'dashboard'>('loader');
-  
+  const [hasSessionLoaded, setHasSessionLoaded] = useState(false);
+  const [hasVisualLoaderFinished, setHasVisualLoaderFinished] = useState(false);
+
+  useEffect(() => {
+    if (hasSessionLoaded && hasVisualLoaderFinished) {
+      if (userRole || userProfile) {
+        setAppPhase('dashboard');
+      } else {
+        setAppPhase('onboarding');
+      }
+    }
+  }, [hasSessionLoaded, hasVisualLoaderFinished, userRole, userProfile]);
+
   // User Profile & Partner State
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userRole, setUserRole] = useState<RoleType | null>(null);
@@ -74,6 +86,7 @@ export default function Home() {
         }
         setUserProgress(getStoredUserProgress());
         setPartnerProgress(getStoredPartnerProgress());
+        setHasSessionLoaded(true);
         return;
       }
 
@@ -118,6 +131,7 @@ export default function Home() {
           setPartnerProgress(getStoredPartnerProgress());
         }
       }
+      setHasSessionLoaded(true);
     }
 
     initSession();
@@ -184,11 +198,7 @@ export default function Home() {
 
   // Handle Loader Finish
   const handleLoaderComplete = () => {
-    if (userRole || userProfile) {
-      setAppPhase('dashboard');
-    } else {
-      setAppPhase('onboarding');
-    }
+    setHasVisualLoaderFinished(true);
   };
 
   // Handle Role Selection
