@@ -356,14 +356,41 @@ export default function Home() {
             <DoomsdayCard />
 
             {/* Footer */}
-            <footer className="bg-black text-white border-t-8 border-black p-8 text-center font-sans">
-              <div className="max-w-4xl mx-auto flex flex-col items-center gap-2">
-                <span className="bg-neo-yellow text-black font-black text-xs px-3 py-1 rounded-full uppercase border-2 border-white shadow-brutal-sm">
-                  COUPLING MULTIVERSE ENGINE ⚡
-                </span>
-                <p className="font-bold text-sm text-gray-300">
-                  Built for couples to conquer the Marvel Cinematic Universe before <span className="text-neo-yellow font-black">Avengers: Doomsday</span>.
-                </p>
+            <footer className="bg-black text-white border-t-8 border-black p-8 text-center font-sans mt-12">
+              <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
+                
+                {/* Brand / Tagline */}
+                <div className="flex flex-col items-center gap-2">
+                  <span className="bg-neo-yellow text-black font-black text-xs px-3 py-1 rounded-full uppercase border-2 border-white shadow-brutal-sm">
+                    COUPLING MULTIVERSE ENGINE ⚡
+                  </span>
+                  <p className="font-bold text-sm text-gray-300">
+                    Built for couples to conquer the Marvel Cinematic Universe before <span className="text-neo-yellow font-black">Avengers: Doomsday</span>.
+                  </p>
+                </div>
+
+                {/* Creator Credits (Brutalist Block) */}
+                <div className="flex flex-col sm:flex-row items-center gap-4 bg-neo-yellow px-6 py-4 border-4 border-white shadow-[6px_6px_0px_0px_rgba(239,68,68,1)] rounded-2xl">
+                  <a 
+                    href="https://www.instagram.com/roith.hhh?igsh=MWdmNHk2NXpmNjZ6Mg==" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="hover:scale-110 transition-transform cursor-pointer w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0"
+                    title="Follow Rohith Das on Instagram"
+                  >
+                    <img src="/logo-black.png" alt="Rohith Das Logo" className="w-full h-full object-contain drop-shadow-[2px_2px_0_rgba(255,255,255,1)]" />
+                  </a>
+                  <div className="flex flex-col gap-1 text-center sm:text-left text-black border-t-4 sm:border-t-0 sm:border-l-4 border-black pt-3 sm:pt-0 sm:pl-4">
+                    <p className="font-display font-black tracking-widest text-lg sm:text-xl uppercase leading-none drop-shadow-[2px_2px_0_rgba(255,255,255,1)]">
+                      CREATED BY ROHITH DAS
+                    </p>
+                    <p className="font-bold text-[10px] sm:text-xs text-black/80 max-w-[250px]">
+                      The Ultimate MCU Watch Tracker for the Road to Doomsday.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Rights Reserved */}
                 <p className="text-xs text-gray-500 font-medium">
                   © 2026 Road to Doomsday. Neo-Brutalist MCU Sync UI.
                 </p>
