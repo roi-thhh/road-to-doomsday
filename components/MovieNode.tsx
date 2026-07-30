@@ -59,7 +59,7 @@ export default function MovieNode({
       >
         {/* Gradient Overlay for Text */}
         {item.posterUrl && (
-          <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-neo-yellow via-neo-yellow/70 to-transparent z-0"></div>
+          <div className="absolute inset-x-0 bottom-0 h-[65%] bg-gradient-to-t from-neo-yellow from-[35%] via-neo-yellow/80 to-transparent z-0"></div>
         )}
 
         {/* Top Badges */}
@@ -74,7 +74,7 @@ export default function MovieNode({
         </div>
 
         {/* Title */}
-        <div className={`relative z-10 font-black uppercase leading-tight px-1 font-display w-full ${item.posterUrl ? 'mt-auto pb-5 text-[9px] md:text-[10px] text-black' : 'text-[11px] md:text-[12px] my-auto'}`}>
+        <div className={`relative z-10 font-black uppercase leading-tight px-1 font-display w-full ${item.posterUrl ? 'mt-auto pb-5 text-[10px] md:text-[11px] tracking-tight text-black drop-shadow-[1px_1px_0_rgba(255,255,255,0.8)]' : 'text-[11px] md:text-[12px] my-auto'}`}>
           <span className="line-clamp-2">{item.title}</span>
         </div>
 
