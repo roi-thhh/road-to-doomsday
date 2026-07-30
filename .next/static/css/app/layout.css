@@ -1629,11 +1629,17 @@ video {
 .duration-700{
   transition-duration: 700ms;
 }
+.\[-ms-overflow-style\:none\]{
+  -ms-overflow-style: none;
+}
 .\[background-size\:16px_16px\]{
   background-size: 16px 16px;
 }
 .\[background-size\:24px_24px\]{
   background-size: 24px 24px;
+}
+.\[scrollbar-width\:none\]{
+  scrollbar-width: none;
 }
 
 :root {
@@ -2057,5 +2063,13 @@ body {
   .lg\:gap-16{
     gap: 4rem;
   }
+
+  .lg\:pb-0{
+    padding-bottom: 0px;
+  }
+}
+
+.\[\&\:\:-webkit-scrollbar\]\:hidden::-webkit-scrollbar{
+  display: none;
 }
 
