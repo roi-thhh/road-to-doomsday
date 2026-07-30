@@ -72,10 +72,10 @@ export default function StickyControlBar({
 
   return (
     <header className="sticky top-0 z-40 bg-neo-yellow text-black border-b-8 border-black shadow-brutal p-4 font-sans">
-      <div className="max-w-7xl mx-auto flex items-center gap-6 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-1 lg:pb-0">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
         
         {/* Brand & Doomsday Countdown Pill */}
-        <div className="flex flex-row items-center gap-4 shrink-0">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-neo-red text-white border-4 border-black rounded-lg flex items-center justify-center font-black shadow-brutal-sm">
               ⚡
@@ -131,7 +131,7 @@ export default function StickyControlBar({
         </div>
 
         {/* Toggles: Order & Scope */}
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex flex-wrap items-center justify-center gap-3 w-full lg:w-auto">
           
           {/* Order Toggle: Chronological vs Release */}
           <div className="bg-black text-white p-1 rounded-xl border-4 border-black flex items-center shadow-brutal-sm">
@@ -195,9 +195,9 @@ export default function StickyControlBar({
         </div>
 
         {/* Watch Progress Counter & Partner Sync Indicator */}
-        <div className="flex flex-row items-center gap-3 shrink-0">
+        <div className="flex flex-row flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
           
-          <div className="flex flex-row items-center gap-2">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full sm:w-auto">
             {/* User Stat Pill */}
             <div className="bg-white border-4 border-black p-2 rounded-xl flex items-center justify-between gap-3 shadow-brutal-sm flex-1">
               <div className="text-left">
