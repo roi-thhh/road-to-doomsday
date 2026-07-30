@@ -128,13 +128,20 @@ export default function AuthModal({
         if (error) throw error;
 
         if (data.user) {
-          const userProf: UserProfile = {
+          // Fetch existing profile to preserve partner_id and role
+          const dbProfile = await fetchDbUserProfile(data.user.id);
+          
+          const userProf: UserProfile = dbProfile || {
             id: data.user.id,
             email: data.user.email || email,
             roleSelection: role,
           };
 
-          await saveDbUserProfile(userProf);
+          // Only save to DB if they somehow don't have a profile
+          if (!dbProfile) {
+            await saveDbUserProfile(userProf);
+          }
+          
           onAuthenticate(userProf);
 
           setSuccessMsg('Signed in successfully!');
