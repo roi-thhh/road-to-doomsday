@@ -127,17 +127,6 @@ export default function StickyControlBar({
                 <span>LOG IN / LINK PARTNER</span>
               </button>
             )}
-
-            {/* Instagram Logo Link */}
-            <a 
-              href="https://www.instagram.com/roith.hhh?igsh=MWdmNHk2NXpmNjZ6Mg==" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="ml-2 hover:scale-105 transition-transform cursor-pointer border-2 border-black bg-white flex items-center justify-center w-10 h-10 rounded-lg shadow-brutal-sm"
-              title="Follow Rohith Das on Instagram"
-            >
-              <img src="/logo-black.png" alt="Rohith Das Logo" className="w-full h-full object-contain p-1" />
-            </a>
           </div>
         </div>
 
@@ -232,6 +221,17 @@ export default function StickyControlBar({
               <Heart className="w-4 h-4 fill-current" />
             </button>
           </div>
+
+          {/* Instagram Logo Link */}
+          <a 
+            href="https://www.instagram.com/roith.hhh?igsh=MWdmNHk2NXpmNjZ6Mg==" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="hover:scale-110 transition-transform cursor-pointer border-4 border-black bg-white flex items-center justify-center w-12 h-12 rounded-xl shadow-brutal-sm"
+            title="Follow Rohith Das on Instagram"
+          >
+            <img src="/logo-black.png" alt="Rohith Das Logo" className="w-full h-full object-contain p-1" />
+          </a>
         </div>
 
       </div>
