@@ -75,7 +75,7 @@ export default function StickyControlBar({
       <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center justify-between gap-4">
         
         {/* Brand & Doomsday Countdown Pill */}
-        <div className="flex items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto justify-between lg:justify-start">
           <div className="flex items-center gap-2">
             <div className="w-10 h-10 bg-neo-red text-white border-4 border-black rounded-lg flex items-center justify-center font-black shadow-brutal-sm">
               ⚡
@@ -137,7 +137,7 @@ export default function StickyControlBar({
           <div className="bg-black text-white p-1 rounded-xl border-4 border-black flex items-center shadow-brutal-sm">
             <button
               onClick={() => setOrder('chronological')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg font-black text-[10px] sm:text-xs uppercase transition-all cursor-pointer ${
                 order === 'chronological'
                   ? 'bg-neo-yellow text-black shadow-brutal-sm scale-105'
                   : 'hover:text-neo-yellow'
@@ -147,7 +147,7 @@ export default function StickyControlBar({
             </button>
             <button
               onClick={() => setOrder('release')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg font-black text-[10px] sm:text-xs uppercase transition-all cursor-pointer ${
                 order === 'release'
                   ? 'bg-neo-yellow text-black shadow-brutal-sm scale-105'
                   : 'hover:text-neo-yellow'
@@ -161,7 +161,7 @@ export default function StickyControlBar({
           <div className="bg-black text-white p-1 rounded-xl border-4 border-black flex items-center shadow-brutal-sm">
             <button
               onClick={() => setScope('essential')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg font-black text-[10px] sm:text-xs uppercase transition-all flex items-center gap-1 cursor-pointer ${
                 scope === 'essential'
                   ? 'bg-neo-red text-white shadow-brutal-sm scale-105'
                   : 'hover:text-neo-red'
@@ -171,7 +171,7 @@ export default function StickyControlBar({
             </button>
             <button
               onClick={() => setScope('completionist')}
-              className={`px-3 py-1.5 rounded-lg font-black text-xs uppercase transition-all flex items-center gap-1 cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg font-black text-[10px] sm:text-xs uppercase transition-all flex items-center gap-1 cursor-pointer ${
                 scope === 'completionist'
                   ? 'bg-neo-blue text-white shadow-brutal-sm scale-105'
                   : 'hover:text-neo-blue'
@@ -195,7 +195,7 @@ export default function StickyControlBar({
         </div>
 
         {/* Watch Progress Counter & Partner Sync Indicator */}
-        <div className="flex items-center justify-between lg:justify-end gap-3 w-full lg:w-auto">
+        <div className="flex flex-wrap items-center justify-center lg:justify-end gap-3 w-full lg:w-auto">
           {/* User Stat Pill */}
           <div className="bg-white border-4 border-black p-2 rounded-xl flex items-center gap-3 shadow-brutal-sm">
             <div className="text-left">

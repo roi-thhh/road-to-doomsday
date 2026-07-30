@@ -58,29 +58,29 @@ export default function DoomsdayCard() {
           <Flame className="w-4 h-4 fill-current text-neo-red" /> THE FINAL CONVERGENCE NODE
         </span>
 
-        <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight mb-1 font-display">
+        <h1 className="text-3xl sm:text-4xl md:text-6xl font-black uppercase tracking-tight mb-1 font-display">
           AVENGERS
         </h1>
-        <h2 className="text-3xl md:text-5xl font-black text-neo-yellow uppercase tracking-widest mb-6 font-display drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
+        <h2 className="text-2xl sm:text-3xl md:text-5xl font-black text-neo-yellow uppercase tracking-widest mb-6 font-display drop-shadow-[4px_4px_0px_rgba(0,0,0,1)]">
           DOOMSDAY
         </h2>
 
         {/* Live Countdown Grid */}
-        <div className="grid grid-cols-4 gap-3 md:gap-4 w-full max-w-lg mb-6">
-          <div className="bg-black border-4 border-white p-3 rounded-xl shadow-brutal">
-            <span className="block text-2xl md:text-4xl font-black text-neo-yellow font-display">{timeLeft.days}</span>
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 md:gap-4 w-full max-w-lg mb-6">
+          <div className="bg-black border-4 border-white p-2 md:p-3 rounded-xl shadow-brutal flex flex-col justify-center">
+            <span className="block text-xl sm:text-2xl md:text-4xl font-black text-neo-yellow font-display leading-none mb-1">{timeLeft.days}</span>
             <span className="text-[9px] md:text-xs font-bold uppercase tracking-wider text-gray-300">DAYS</span>
           </div>
-          <div className="bg-black border-4 border-white p-3 rounded-xl shadow-brutal">
-            <span className="block text-2xl md:text-4xl font-black text-white font-display">{timeLeft.hours}</span>
+          <div className="bg-black border-4 border-white p-2 md:p-3 rounded-xl shadow-brutal flex flex-col justify-center">
+            <span className="block text-xl sm:text-2xl md:text-4xl font-black text-white font-display leading-none mb-1">{timeLeft.hours}</span>
             <span className="text-[9px] md:text-xs font-bold uppercase tracking-wider text-gray-300">HOURS</span>
           </div>
-          <div className="bg-black border-4 border-white p-3 rounded-xl shadow-brutal">
-            <span className="block text-2xl md:text-4xl font-black text-neo-yellow font-display">{timeLeft.minutes}</span>
+          <div className="bg-black border-4 border-white p-2 md:p-3 rounded-xl shadow-brutal flex flex-col justify-center">
+            <span className="block text-xl sm:text-2xl md:text-4xl font-black text-neo-yellow font-display leading-none mb-1">{timeLeft.minutes}</span>
             <span className="text-[9px] md:text-xs font-bold uppercase tracking-wider text-gray-300">MINS</span>
           </div>
-          <div className="bg-black border-4 border-white p-3 rounded-xl shadow-brutal">
-            <span className="block text-2xl md:text-4xl font-black text-neo-green font-display">{timeLeft.seconds}</span>
+          <div className="bg-black border-4 border-white p-2 md:p-3 rounded-xl shadow-brutal flex flex-col justify-center">
+            <span className="block text-xl sm:text-2xl md:text-4xl font-black text-neo-green font-display leading-none mb-1">{timeLeft.seconds}</span>
             <span className="text-[9px] md:text-xs font-bold uppercase tracking-wider text-gray-300">SECS</span>
           </div>
         </div>

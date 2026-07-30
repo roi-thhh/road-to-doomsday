@@ -54,7 +54,7 @@ export default function MovieNode({
         whileHover={{ scale: 1.08, rotate: 2 }}
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
-        className={`relative z-10 flex flex-col items-center justify-between p-3 w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-black text-center cursor-pointer transition-all duration-300 ${nodeBg} shadow-brutal hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-cover bg-center`}
+        className={`relative z-10 flex flex-col items-center justify-between p-3 w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full border-4 border-black text-center cursor-pointer transition-all duration-300 ${nodeBg} shadow-brutal hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-cover bg-center`}
         style={item.posterUrl ? { backgroundImage: `url(${item.posterUrl})` } : {}}
       >
         {/* Gradient Overlay for Text */}
@@ -74,7 +74,7 @@ export default function MovieNode({
         </div>
 
         {/* Title */}
-        <div className={`relative z-10 font-black uppercase leading-tight px-1 font-display w-full ${item.posterUrl ? 'mt-auto pb-5 text-[10px] md:text-[11px] tracking-tight text-black drop-shadow-[1px_1px_0_rgba(255,255,255,0.8)]' : 'text-[11px] md:text-[12px] my-auto'}`}>
+        <div className={`relative z-10 font-black uppercase leading-tight px-1 font-display w-full ${item.posterUrl ? 'mt-auto pb-5 text-[9px] sm:text-[10px] md:text-[11px] tracking-tight text-black drop-shadow-[1px_1px_0_rgba(255,255,255,0.8)]' : 'text-[10px] sm:text-[11px] md:text-[12px] my-auto'}`}>
           <span className="line-clamp-2">{item.title}</span>
         </div>
 
