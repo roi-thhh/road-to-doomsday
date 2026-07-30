@@ -8,7 +8,8 @@ import {
   RoleSelection as RoleType, 
   TimelineOrder, 
   ScopeMode, 
-  UserProfile 
+  UserProfile,
+  PartnerRequest
 } from '@/lib/types';
 import { 
   getStoredUserProfile, 
@@ -26,10 +27,13 @@ import TimelineTraverse from '@/components/TimelineTraverse';
 import MovieModal from '@/components/MovieModal';
 import DoomsdayCard from '@/components/DoomsdayCard';
 import { 
+  supabase,
+  fetchDbUserProfile,
   fetchDbUserProgress, 
   fetchDbPartnerProgress, 
   saveDbUserProgress, 
-  isSupabaseConfigured 
+  isSupabaseConfigured,
+  fetchPendingPartnerRequests
 } from '@/lib/supabase';
 import { SERIES_ROAD_ROWS, MOVIE_ROAD_ROWS } from '@/lib/mcuData';
 
@@ -42,8 +46,9 @@ export default function Home() {
   const [userRole, setUserRole] = useState<RoleType | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup' | 'partner'>('signin');
+  const [pendingRequests, setPendingRequests] = useState<PartnerRequest[]>([]);
 
-  // Watch Progress State (starts completely empty by default for new accounts)
+  // Watch Progress State (Starts clean and empty for new accounts)
   const [userProgress, setUserProgress] = useState<Record<string, WatchStatus>>({});
   const [partnerProgress, setPartnerProgress] = useState<Record<string, WatchStatus>>({});
 
@@ -56,43 +61,130 @@ export default function Home() {
   // Modal State
   const [selectedMovie, setSelectedMovie] = useState<MCUItem | null>(null);
 
-  // Initial Data Load & Supabase Backend Sync
+  // -----------------------------------------------------------
+  // 1. PERSISTENT SESSION LISTENER (Keeps user signed in across refresh)
+  // -----------------------------------------------------------
   useEffect(() => {
-    async function loadBackendData() {
-      const profile = getStoredUserProfile();
-      if (profile) {
-        setUserProfile(profile);
-        setUserRole(profile.roleSelection);
-
-        // Fetch user progress from Supabase
-        if (profile.id) {
-          const dbProgress = await fetchDbUserProgress(profile.id);
-          setUserProgress(dbProgress);
-          setStoredUserProgress(dbProgress);
-        } else {
-          setUserProgress(getStoredUserProgress());
+    async function initSession() {
+      if (!isSupabaseConfigured()) {
+        const stored = getStoredUserProfile();
+        if (stored) {
+          setUserProfile(stored);
+          setUserRole(stored.roleSelection);
         }
-
-        // Fetch partner progress from Supabase if partner linked
-        if (profile.partnerId || profile.partnerEmail) {
-          const target = profile.partnerId || profile.partnerEmail || '';
-          const dbPartnerProgress = await fetchDbPartnerProgress(target);
-          setPartnerProgress(dbPartnerProgress);
-          setStoredPartnerProgress(dbPartnerProgress);
-        } else {
-          setPartnerProgress(getStoredPartnerProgress());
-        }
-      } else {
         setUserProgress(getStoredUserProgress());
         setPartnerProgress(getStoredPartnerProgress());
+        return;
+      }
+
+      // Restore session from Supabase Auth
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const dbProfile = await fetchDbUserProfile(session.user.id);
+        const activeProfile: UserProfile = dbProfile || {
+          id: session.user.id,
+          email: session.user.email || '',
+          roleSelection: getStoredUserProfile()?.roleSelection || null,
+        };
+
+        setUserProfile(activeProfile);
+        setUserRole(activeProfile.roleSelection);
+        setStoredUserProfile(activeProfile);
+
+        // Load progress for user
+        const dbProg = await fetchDbUserProgress(session.user.id);
+        setUserProgress(dbProg);
+        setStoredUserProgress(dbProg);
+
+        // Load progress for partner if linked
+        if (activeProfile.partnerId || activeProfile.partnerEmail) {
+          const target = activeProfile.partnerId || activeProfile.partnerEmail || '';
+          const partnerProg = await fetchDbPartnerProgress(target);
+          setPartnerProgress(partnerProg);
+          setStoredPartnerProgress(partnerProg);
+        }
+
+        // Fetch pending requests
+        if (activeProfile.email) {
+          const reqs = await fetchPendingPartnerRequests(activeProfile.email);
+          setPendingRequests(reqs);
+        }
+      } else {
+        const stored = getStoredUserProfile();
+        if (stored) {
+          setUserProfile(stored);
+          setUserRole(stored.roleSelection);
+          setUserProgress(getStoredUserProgress());
+          setPartnerProgress(getStoredPartnerProgress());
+        }
       }
     }
-    loadBackendData();
+
+    initSession();
+
+    // Listen for Auth Changes (Sign in, Sign out, Session Refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const dbProfile = await fetchDbUserProfile(session.user.id);
+        if (dbProfile) {
+          setUserProfile(dbProfile);
+          setUserRole(dbProfile.roleSelection);
+          setStoredUserProfile(dbProfile);
+        }
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
+
+  // -----------------------------------------------------------
+  // 2. REAL-TIME LIVE WATCH PROGRESS SUBSCRIPTION & AUTO-SYNC
+  // -----------------------------------------------------------
+  useEffect(() => {
+    if (!isSupabaseConfigured() || (!userProfile?.partnerId && !userProfile?.partnerEmail)) return;
+
+    const partnerTarget = userProfile?.partnerId || userProfile?.partnerEmail || '';
+
+    // Interval sync (5s) for live progress overlay updates across devices
+    const interval = setInterval(async () => {
+      if (partnerTarget) {
+        const partnerProg = await fetchDbPartnerProgress(partnerTarget);
+        setPartnerProgress(partnerProg);
+        setStoredPartnerProgress(partnerProg);
+      }
+      if (userProfile?.email) {
+        const reqs = await fetchPendingPartnerRequests(userProfile.email);
+        setPendingRequests(reqs);
+      }
+    }, 5000);
+
+    // Supabase Realtime channel subscription
+    const channel = supabase
+      .channel('public:user_progress')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_progress' },
+        async (payload) => {
+          if (partnerTarget) {
+            const updated = await fetchDbPartnerProgress(partnerTarget);
+            setPartnerProgress(updated);
+            setStoredPartnerProgress(updated);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      clearInterval(interval);
+      supabase.removeChannel(channel);
+    };
+  }, [userProfile?.partnerId, userProfile?.partnerEmail, userProfile?.email]);
 
   // Handle Loader Finish
   const handleLoaderComplete = () => {
-    if (userRole) {
+    if (userRole || userProfile) {
       setAppPhase('dashboard');
     } else {
       setAppPhase('onboarding');
@@ -130,26 +222,35 @@ export default function Home() {
     }
   };
 
-  // Handle Partner Linking
+  // Handle Partner Linking/Accepting
   const handlePartnerLinked = async (partnerIdOrEmail: string) => {
     if (!partnerIdOrEmail.trim()) return;
 
-    if (userProfile) {
-      const updatedProfile: UserProfile = {
-        ...userProfile,
-        partnerId: partnerIdOrEmail.trim(),
-      };
-      setUserProfile(updatedProfile);
-      setStoredUserProfile(updatedProfile);
+    if (userProfile?.id && isSupabaseConfigured()) {
+      const updatedProfile = await fetchDbUserProfile(userProfile.id);
+      if (updatedProfile) {
+        setUserProfile(updatedProfile);
+        setStoredUserProfile(updatedProfile);
+      }
     }
 
-    // Fetch real partner progress from Supabase database
     const dbPartnerProgress = await fetchDbPartnerProgress(partnerIdOrEmail.trim());
     setPartnerProgress(dbPartnerProgress);
     setStoredPartnerProgress(dbPartnerProgress);
   };
 
-  // Handle Watch Status Toggle for a movie (Saves to both Supabase and Local Storage)
+  // Handle Partner Unlinking
+  const handlePartnerUnlinked = () => {
+    if (userProfile) {
+      const updated: UserProfile = { ...userProfile, partnerId: undefined, partnerEmail: undefined };
+      setUserProfile(updated);
+      setStoredUserProfile(updated);
+    }
+    setPartnerProgress({});
+    setStoredPartnerProgress({});
+  };
+
+  // Handle Watch Status Toggle for a movie (Saves to Supabase & LocalStorage)
   const handleToggleStatus = async (movieId: string, status: WatchStatus, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     const updated = { ...userProgress, [movieId]: status };
@@ -162,14 +263,17 @@ export default function Home() {
     }
   };
 
-  // Handle Refreshing Partner Progress from Database
-  const handleRefreshPartnerProgress = async () => {
-    if ((userProfile?.partnerId || userProfile?.partnerEmail) && isSupabaseConfigured()) {
-      const target = userProfile.partnerId || userProfile.partnerEmail || '';
-      const dbPartnerProgress = await fetchDbPartnerProgress(target);
-      setPartnerProgress(dbPartnerProgress);
-      setStoredPartnerProgress(dbPartnerProgress);
+  // Explicit User Logout
+  const handleLogout = async () => {
+    if (isSupabaseConfigured()) {
+      await supabase.auth.signOut();
     }
+    setUserProfile(null);
+    setUserRole(null);
+    setUserProgress({});
+    setPartnerProgress({});
+    localStorage.clear();
+    setAppPhase('onboarding');
   };
 
   // Compute total items count depending on scope
@@ -217,15 +321,14 @@ export default function Home() {
                 setAuthModalMode(mode);
                 setIsAuthModalOpen(true);
               }}
-              onLogout={() => {
-                setUserProfile(null);
-                setUserRole(null);
-                setUserProgress({});
-                setPartnerProgress({});
-                localStorage.clear();
-                setAppPhase('onboarding');
+              onLogout={handleLogout}
+              onRefreshPartnerProgress={async () => {
+                if (userProfile?.partnerId || userProfile?.partnerEmail) {
+                  const target = userProfile.partnerId || userProfile.partnerEmail || '';
+                  const updated = await fetchDbPartnerProgress(target);
+                  setPartnerProgress(updated);
+                }
               }}
-              onRefreshPartnerProgress={handleRefreshPartnerProgress}
             />
 
             {/* Serpentine Timeline Tree */}
@@ -269,6 +372,7 @@ export default function Home() {
         initialMode={authModalMode}
         onAuthenticate={handleAuthenticate}
         onPartnerLinked={handlePartnerLinked}
+        onPartnerUnlinked={handlePartnerUnlinked}
       />
 
       {/* Movie Details Modal */}

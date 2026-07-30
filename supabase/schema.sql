@@ -60,14 +60,26 @@ CREATE TABLE IF NOT EXISTS public.user_progress (
   CONSTRAINT unique_user_movie UNIQUE (user_id, movie_id)
 );
 
+-- 5. PARTNER_REQUESTS TABLE (BIDIRECTIONAL COUPLE INVITES)
+CREATE TABLE IF NOT EXISTS public.partner_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  receiver_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  sender_email TEXT NOT NULL,
+  receiver_email TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'pending', -- 'pending', 'accepted', 'declined'
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- ========================================================
 -- ROW LEVEL SECURITY (RLS) POLICIES
--- Allows partners to view each other's progress securely
 -- ========================================================
 
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.movies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.user_progress ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.partner_requests ENABLE ROW LEVEL SECURITY;
 
 -- Movies Table: Public Read Access
 DROP POLICY IF EXISTS "Movies are publicly readable" ON public.movies;
@@ -75,11 +87,7 @@ CREATE POLICY "Movies are publicly readable"
 ON public.movies FOR SELECT 
 USING (true);
 
--- Users Table Policies: Flexible Read/Insert/Update for couples
-DROP POLICY IF EXISTS "Users can read own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can read partner profile" ON public.users;
-DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
-DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
+-- Users Table Policies
 DROP POLICY IF EXISTS "Users profile public read" ON public.users;
 DROP POLICY IF EXISTS "Users profile insert" ON public.users;
 DROP POLICY IF EXISTS "Users profile update" ON public.users;
@@ -97,13 +105,16 @@ ON public.users FOR UPDATE
 USING (true);
 
 -- User Progress Policies
-DROP POLICY IF EXISTS "Users can read own progress" ON public.user_progress;
-DROP POLICY IF EXISTS "Users can read linked partner progress" ON public.user_progress;
-DROP POLICY IF EXISTS "Users can manage own progress" ON public.user_progress;
 DROP POLICY IF EXISTS "User progress public access" ON public.user_progress;
-
 CREATE POLICY "User progress public access" 
 ON public.user_progress FOR ALL 
+USING (true)
+WITH CHECK (true);
+
+-- Partner Requests Policies
+DROP POLICY IF EXISTS "Partner requests public access" ON public.partner_requests;
+CREATE POLICY "Partner requests public access" 
+ON public.partner_requests FOR ALL 
 USING (true)
 WITH CHECK (true);
 

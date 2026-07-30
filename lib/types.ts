@@ -41,3 +41,13 @@ export interface PartnerProgress {
   partnerRole?: RoleSelection;
   progress: Record<string, WatchStatus>;
 }
+
+export interface PartnerRequest {
+  id: string;
+  senderId: string;
+  receiverId: string;
+  senderEmail: string;
+  receiverEmail: string;
+  status: 'pending' | 'accepted' | 'declined';
+  createdAt: string;
+}
