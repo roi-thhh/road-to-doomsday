@@ -54,37 +54,42 @@ export default function MovieNode({
         whileHover={{ scale: 1.08, rotate: 2 }}
         whileTap={{ scale: 0.95 }}
         onClick={onClick}
-        className={`relative z-10 flex flex-col items-center justify-between p-3 w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-black text-center cursor-pointer transition-all duration-300 ${nodeBg} shadow-brutal hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)]`}
+        className={`relative z-10 flex flex-col items-center justify-between p-3 w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-black text-center cursor-pointer transition-all duration-300 ${nodeBg} shadow-brutal hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-cover bg-center`}
+        style={item.posterUrl ? { backgroundImage: `url(${item.posterUrl})` } : {}}
       >
         {/* Top Badges */}
-        <div className="flex items-center justify-between w-full px-2 pt-1 text-[9px] font-black">
+        <div className="relative z-10 flex items-center justify-between w-full px-2 pt-1 text-[9px] font-black">
           <span className="bg-black text-white px-1.5 py-0.5 rounded border border-black uppercase">
             P{item.phase}
           </span>
-          <div className="flex items-center gap-0.5 text-black">
+          <div className="flex items-center gap-0.5 bg-white px-1.5 py-0.5 rounded border border-black text-black">
             <Star className="w-3 h-3 fill-neo-yellow text-black" />
             <span>{item.imdbRating}</span>
           </div>
         </div>
 
         {/* Title */}
-        <span className="font-black text-[11px] md:text-[12px] uppercase leading-snug px-1 line-clamp-2 my-auto font-display">
-          {item.title}
-        </span>
+        {!item.posterUrl && (
+          <span className="relative z-10 font-black text-[11px] md:text-[12px] uppercase leading-snug px-1 line-clamp-2 my-auto font-display">
+            {item.title}
+          </span>
+        )}
 
         {/* Release Date / Media tag */}
-        <span className="text-[8px] md:text-[9px] font-bold opacity-80 uppercase pb-1">
-          {item.releaseDate.split(',')[1] || item.releaseDate}
-        </span>
+        {!item.posterUrl && (
+          <span className="relative z-10 text-[8px] md:text-[9px] font-bold opacity-80 uppercase pb-1">
+            {item.releaseDate.split(',')[1] || item.releaseDate}
+          </span>
+        )}
 
         {/* Status Indicator Bar at bottom of circle */}
         {isWatched && (
-          <div className="absolute bottom-1 bg-black text-neo-yellow px-2 py-0.5 rounded-full border border-black text-[8px] font-black uppercase flex items-center gap-1">
+          <div className="absolute bottom-1 z-10 bg-black text-neo-yellow px-2 py-0.5 rounded-full border border-black text-[8px] font-black uppercase flex items-center gap-1">
             <Check className="w-2.5 h-2.5" /> WATCHED
           </div>
         )}
         {isWatching && (
-          <div className="absolute bottom-1 bg-neo-yellow text-black px-2 py-0.5 rounded-full border border-black text-[8px] font-black uppercase flex items-center gap-1 animate-pulse">
+          <div className="absolute bottom-1 z-10 bg-neo-yellow text-black px-2 py-0.5 rounded-full border border-black text-[8px] font-black uppercase flex items-center gap-1 animate-pulse">
             <Eye className="w-2.5 h-2.5" /> WATCHING
           </div>
         )}

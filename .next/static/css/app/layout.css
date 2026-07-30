@@ -1117,6 +1117,12 @@ video {
 .bg-\[radial-gradient\(\#FFFFFF_1px\2c transparent_1px\)\]{
   background-image: radial-gradient(#FFFFFF 1px,transparent 1px);
 }
+.bg-cover{
+  background-size: cover;
+}
+.bg-center{
+  background-position: center;
+}
 .fill-black{
   fill: #000;
 }
