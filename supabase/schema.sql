@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS public.movies (
 CREATE TABLE IF NOT EXISTS public.user_progress (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-  movie_id TEXT NOT NULL REFERENCES public.movies(id) ON DELETE CASCADE,
+  movie_id TEXT NOT NULL,
   status watch_status_type NOT NULL DEFAULT 'unwatched',
   updated_at TIMESTAMPTZ DEFAULT NOW(),
   CONSTRAINT unique_user_movie UNIQUE (user_id, movie_id)
