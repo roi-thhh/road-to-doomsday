@@ -57,6 +57,11 @@ export default function MovieNode({
         className={`relative z-10 flex flex-col items-center justify-between p-3 w-32 h-32 md:w-36 md:h-36 rounded-full border-4 border-black text-center cursor-pointer transition-all duration-300 ${nodeBg} shadow-brutal hover:shadow-[10px_10px_0px_0px_rgba(0,0,0,1)] overflow-hidden bg-cover bg-center`}
         style={item.posterUrl ? { backgroundImage: `url(${item.posterUrl})` } : {}}
       >
+        {/* Gradient Overlay for Text */}
+        {item.posterUrl && (
+          <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-neo-yellow via-neo-yellow/70 to-transparent z-0"></div>
+        )}
+
         {/* Top Badges */}
         <div className="relative z-10 flex items-center justify-between w-full px-2 pt-1 text-[9px] font-black">
           <span className="bg-black text-white px-1.5 py-0.5 rounded border border-black uppercase">
@@ -69,13 +74,11 @@ export default function MovieNode({
         </div>
 
         {/* Title */}
-        {!item.posterUrl && (
-          <span className="relative z-10 font-black text-[11px] md:text-[12px] uppercase leading-snug px-1 line-clamp-2 my-auto font-display">
-            {item.title}
-          </span>
-        )}
+        <div className={`relative z-10 font-black uppercase leading-tight px-1 font-display w-full ${item.posterUrl ? 'mt-auto pb-5 text-[9px] md:text-[10px] text-black' : 'text-[11px] md:text-[12px] my-auto'}`}>
+          <span className="line-clamp-2">{item.title}</span>
+        </div>
 
-        {/* Release Date / Media tag */}
+        {/* Release Date / Media tag (Only if no poster) */}
         {!item.posterUrl && (
           <span className="relative z-10 text-[8px] md:text-[9px] font-bold opacity-80 uppercase pb-1">
             {item.releaseDate.split(',')[1] || item.releaseDate}

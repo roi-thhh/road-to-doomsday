@@ -529,6 +529,10 @@ video {
 .inset-0{
   inset: 0px;
 }
+.inset-x-0{
+  left: 0px;
+  right: 0px;
+}
 .-bottom-10{
   bottom: -2.5rem;
 }
@@ -659,6 +663,9 @@ video {
 .mt-2{
   margin-top: 0.5rem;
 }
+.mt-auto{
+  margin-top: auto;
+}
 .line-clamp-2{
   overflow: hidden;
   display: -webkit-box;
@@ -736,6 +743,9 @@ video {
 }
 .h-full{
   height: 100%;
+}
+.h-3\/5{
+  height: 60%;
 }
 .max-h-\[90vh\]{
   max-height: 90vh;
@@ -1117,6 +1127,21 @@ video {
 .bg-\[radial-gradient\(\#FFFFFF_1px\2c transparent_1px\)\]{
   background-image: radial-gradient(#FFFFFF 1px,transparent 1px);
 }
+.bg-gradient-to-t{
+  background-image: linear-gradient(to top, var(--tw-gradient-stops));
+}
+.from-neo-yellow{
+  --tw-gradient-from: #FACC15 var(--tw-gradient-from-position);
+  --tw-gradient-to: rgb(250 204 21 / 0) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+.via-neo-yellow\/70{
+  --tw-gradient-to: rgb(250 204 21 / 0)  var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), rgb(250 204 21 / 0.7) var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+.to-transparent{
+  --tw-gradient-to: transparent var(--tw-gradient-to-position);
+}
 .bg-cover{
   background-size: cover;
 }
@@ -1249,6 +1274,9 @@ video {
 }
 .pt-4{
   padding-top: 1rem;
+}
+.pb-5{
+  padding-bottom: 1.25rem;
 }
 .text-left{
   text-align: left;
@@ -1743,6 +1771,10 @@ body {
   .md\:text-xs{
     font-size: 0.75rem;
     line-height: 1rem;
+  }
+
+  .md\:text-\[10px\]{
+    font-size: 10px;
   }
 }
 
