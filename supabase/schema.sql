@@ -98,25 +98,40 @@ USING (true);
 
 CREATE POLICY "Users profile insert" 
 ON public.users FOR INSERT 
-WITH CHECK (true);
+WITH CHECK (auth.uid() = id);
 
 CREATE POLICY "Users profile update" 
 ON public.users FOR UPDATE 
-USING (true);
+USING (auth.uid() = id);
 
 -- User Progress Policies
-DROP POLICY IF EXISTS "User progress public access" ON public.user_progress;
-CREATE POLICY "User progress public access" 
+DROP POLICY IF EXISTS "User progress public read" ON public.user_progress;
+DROP POLICY IF EXISTS "User progress owner modification" ON public.user_progress;
+
+CREATE POLICY "User progress public read" 
+ON public.user_progress FOR SELECT 
+USING (true);
+
+CREATE POLICY "User progress owner modification" 
 ON public.user_progress FOR ALL 
-USING (true)
-WITH CHECK (true);
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
 -- Partner Requests Policies
-DROP POLICY IF EXISTS "Partner requests public access" ON public.partner_requests;
-CREATE POLICY "Partner requests public access" 
-ON public.partner_requests FOR ALL 
-USING (true)
-WITH CHECK (true);
+DROP POLICY IF EXISTS "Partner requests access" ON public.partner_requests;
+DROP POLICY IF EXISTS "Partner requests insert" ON public.partner_requests;
+
+CREATE POLICY "Partner requests access" 
+ON public.partner_requests FOR SELECT 
+USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+
+CREATE POLICY "Partner requests insert" 
+ON public.partner_requests FOR INSERT 
+WITH CHECK (auth.uid() = sender_id);
+
+CREATE POLICY "Partner requests update delete" 
+ON public.partner_requests FOR UPDATE 
+USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
 
 -- ========================================================
 -- PRE-FILL DATA (DOOMSDAY ESSENTIALS)
