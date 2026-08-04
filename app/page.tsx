@@ -355,8 +355,65 @@ export default function Home() {
             {/* Final Convergence Node: Avengers Doomsday Card */}
             <DoomsdayCard />
 
+            {/* SEO & Knowledge Hub: MCU Watch Guide & FAQ */}
+            <section className="max-w-5xl mx-auto px-4 py-8 mt-12 border-t-8 border-black font-sans">
+              <div className="bg-neo-yellow border-4 border-black p-6 sm:p-8 rounded-3xl shadow-brutal mb-8">
+                <h2 className="font-display text-2xl sm:text-4xl font-black uppercase tracking-tight text-black flex items-center gap-3">
+                  <span>📖</span> MCU Watch Order & Avengers: Doomsday Guide
+                </h2>
+                <p className="font-bold text-sm sm:text-base text-black/90 mt-2 max-w-3xl">
+                  Preparing for Robert Downey Jr.’s return as Doctor Doom in <strong>Avengers: Doomsday (2026)</strong>? 
+                  Here is everything you need to know about navigating the Marvel Cinematic Universe (MCU) chronological order, theatrical release order, and key multiverse essentials.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                {/* FAQ Card 1 */}
+                <article className="bg-white border-4 border-black p-6 rounded-2xl shadow-brutal flex flex-col gap-2">
+                  <h3 className="font-display font-black text-lg sm:text-xl text-black">
+                    ⚡ What is the best order to watch the MCU before Avengers: Doomsday?
+                  </h3>
+                  <p className="text-sm font-semibold text-gray-700 leading-relaxed">
+                    You can track your rewatch using two proven methods on <strong>Road to Doomsday</strong>:
+                    <br />• <strong>Theatrical Release Order:</strong> Best for experiencing how post-credits scenes and character arcs unfolded in cinemas worldwide.
+                    <br />• <strong>Chronological Order:</strong> Best for following the in-universe timeline from <em>Captain America: The First Avenger</em> (1940s) through the Multiverse Saga.
+                  </p>
+                </article>
+
+                {/* FAQ Card 2 */}
+                <article className="bg-white border-4 border-black p-6 rounded-2xl shadow-brutal flex flex-col gap-2">
+                  <h3 className="font-display font-black text-lg sm:text-xl text-black">
+                    🔥 What are the "Doomsday Essentials"?
+                  </h3>
+                  <p className="text-sm font-semibold text-gray-700 leading-relaxed">
+                    Short on time? Toggle the <strong>Doomsday Essentials</strong> filter to cut the fat and focus strictly on core Multiverse anchor projects: <em>Avengers: Endgame</em>, <em>Loki</em>, <em>Spider-Man: No Way Home</em>, <em>Doctor Strange in the Multiverse of Madness</em>, <em>Deadpool & Wolverine</em>, and <em>The Fantastic Four: First Steps</em>.
+                  </p>
+                </article>
+
+                {/* FAQ Card 3 */}
+                <article className="bg-white border-4 border-black p-6 rounded-2xl shadow-brutal flex flex-col gap-2">
+                  <h3 className="font-display font-black text-lg sm:text-xl text-black">
+                    💑 How does Couple Partner Sync work?
+                  </h3>
+                  <p className="text-sm font-semibold text-gray-700 leading-relaxed">
+                    Sign in to get your unique <strong>Sync ID</strong> and send a partner invite to your significant other. Once linked, whenever either person marks a movie as <em>Watched</em> or <em>Watching</em>, both screens update instantly in real-time with dual progress meters.
+                  </p>
+                </article>
+
+                {/* FAQ Card 4 */}
+                <article className="bg-white border-4 border-black p-6 rounded-2xl shadow-brutal flex flex-col gap-2">
+                  <h3 className="font-display font-black text-lg sm:text-xl text-black">
+                    🕒 When does Avengers: Doomsday release?
+                  </h3>
+                  <p className="text-sm font-semibold text-gray-700 leading-relaxed">
+                    <em>Avengers: Doomsday</em> is scheduled for global theatrical release in <strong>May 2026</strong>. Directed by the Russo Brothers and starring Robert Downey Jr. as Victor Von Doom, it paves the path toward <em>Avengers: Secret Wars</em>.
+                  </p>
+                </article>
+              </div>
+            </section>
+
             {/* Footer */}
-            <footer className="bg-black text-white border-t-8 border-black p-8 text-center font-sans mt-12">
+            <footer className="bg-black text-white border-t-8 border-black p-8 text-center font-sans mt-8">
               <div className="max-w-4xl mx-auto flex flex-col items-center gap-6">
                 
                 {/* Brand / Tagline */}
